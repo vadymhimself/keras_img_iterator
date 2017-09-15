@@ -45,7 +45,7 @@ class SingleDirectoryIterator(Iterator):
             (if `save_to_dir` is set).
     """
 
-    def __init__(self, directory, filenames, labels, image_data_generator,
+    def __init__(self, directory, filenames, labels, classes, image_data_generator,
                  target_size=(256, 256), color_mode='rgb',
                  class_mode='categorical',
                  batch_size=32, shuffle=True, seed=None,
@@ -89,7 +89,6 @@ class SingleDirectoryIterator(Iterator):
         self.samples = len(filenames)
         self.filenames = filenames
 
-        classes = set(labels)
         self.num_class = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
         self.classes = list(classes)
