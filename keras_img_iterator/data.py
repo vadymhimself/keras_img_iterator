@@ -45,13 +45,13 @@ class SingleDirectoryIterator(Iterator):
             (if `save_to_dir` is set).
     """
 
-    def __init__(self, directory, filenames, labels, classes, image_data_generator,
-                 target_size=(256, 256), color_mode='rgb',
+    def __init__(self, directory, filenames, image_data_generator,
+                 classes=None, labels=None, target_size=(256, 256),
+                 color_mode='rgb',
                  class_mode='categorical',
                  batch_size=32, shuffle=True, seed=None,
                  data_format=None,
-                 save_to_dir=None, save_prefix='', save_format='png',
-                 follow_links=False):
+                 save_to_dir=None, save_prefix='', save_format='png'):
         if data_format is None:
             data_format = K.image_data_format()
         self.directory = directory
@@ -89,15 +89,16 @@ class SingleDirectoryIterator(Iterator):
         self.samples = len(filenames)
         self.filenames = filenames
 
-        self.num_class = len(classes)
-        self.class_indices = dict(zip(classes, range(len(classes))))
-        self.classes = list(classes)
+        if labels is not None:
+            if not classes:
+                raise ValueError('Classes must be specified for consistency')
+            self.num_class = len(classes)
+            self.classes = list(classes)
+            class_indices = dict(zip(classes, range(len(classes))))
+            encode = np.vectorize(lambda label: class_indices[label])
+            self.labels = encode(labels)
 
-        encode = np.vectorize(lambda label: self.class_indices[label])
-        self.labels = encode(labels)
-
-        print('Found %d files belonging to %d classes.' % (
-            self.samples, self.num_class))
+        print('Found %d files belonging to %d classes.' % (self.samples, self.num_class))
 
         super(SingleDirectoryIterator, self).__init__(self.samples, batch_size,
                                                       shuffle, seed)
@@ -130,13 +131,19 @@ class SingleDirectoryIterator(Iterator):
         if self.save_to_dir:
             for i, j in enumerate(index_array):
                 img = array_to_img(batch_x[i], self.data_format, scale=True)
+                label = self.classes[self.labels[j]] if self.classes else ''
                 fname = '{prefix}_{index}_{hash}_{label}.{format}'.format(
                     prefix=self.save_prefix,
                     index=current_index + i,
                     hash=np.random.randint(1e4),
-                    label=self.classes[self.labels[j]],
+                    label=label,
                     format=self.save_format)
                 img.save(os.path.join(self.save_to_dir, fname))
+
+        # if yielding only input batches
+        if self.labels is None:
+            return batch_x
+
         # build batch of labels
         if self.class_mode == 'input':
             batch_y = batch_x.copy()
