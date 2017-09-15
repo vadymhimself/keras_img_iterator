@@ -1,6 +1,6 @@
-# Image Iterator fir Keras Image Preprocessing
+# Image Iterator for Keras Image Preprocessing
 Loads batches of generated images with one-hot encoded labels. Intended to be used with keras `ImageDataGenerator`. 
-Useful to iterate over the list of files with corresponding labels.
+Useful to iterate over a list of files with corresponding labels.
 
 ## Usage
 ```Python
