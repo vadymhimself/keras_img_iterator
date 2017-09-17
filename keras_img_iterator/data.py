@@ -89,16 +89,20 @@ class SingleDirectoryIterator(Iterator):
         self.samples = len(filenames)
         self.filenames = filenames
 
+        self.labels = labels
+        self.classes = classes
+
         if labels is not None:
             if not classes:
-                raise ValueError('Classes must be specified for consistency')
+                raise ValueError(
+                    'Classes list must be specified for consistency')
             self.num_class = len(classes)
             self.classes = list(classes)
             class_indices = dict(zip(classes, range(len(classes))))
             encode = np.vectorize(lambda label: class_indices[label])
             self.labels = encode(labels)
-
-        print('Found %d files belonging to %d classes.' % (self.samples, self.num_class))
+            print('Found %d files belonging to %d classes.' %
+                  (self.samples, self.num_class))
 
         super(SingleDirectoryIterator, self).__init__(self.samples, batch_size,
                                                       shuffle, seed)

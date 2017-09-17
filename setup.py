@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='keras_img_iterator',
-    version='1.2',
+    version='1.3',
     packages=['keras_img_iterator'],
     url='http://github.com/bolein/keras_img_iterator',
     license='MIT',
